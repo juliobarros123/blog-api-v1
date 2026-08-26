@@ -1,0 +1,75 @@
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: blog-nginx
+    ports:
+      - "9009:80"
+    volumes:
+      - ./public:/var/www/html/public:ro
+      - ./docker/nginx:/etc/nginx/conf.d:ro
+    depends_on:
+      - app
+    networks:
+      - blog-network
+    restart: unless-stopped
+
+  app:
+    build:
+      context: .
+      target: production
+    container_name: blog-app
+    environment:
+      - APP_ENV=production
+      - APP_DEBUG=true
+      - DB_CONNECTION=mysql
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=blog
+      - DB_USERNAME=root
+      - DB_PASSWORD=root
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./:/var/www/html
+      - vendor:/var/www/html/vendor
+      - storage:/var/www/html/storage
+      - bootstrap_cache:/var/www/html/bootstrap/cache
+    expose:
+      - "9000"
+    networks:
+      - blog-network
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    container_name: blog-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: blog
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      timeout: 20s
+      retries: 10
+      interval: 5s
+    networks:
+      - blog-network
+    restart: unless-stopped
+
+volumes:
+  db_data:
+    name: blog-api-v1_db_data
+  vendor:
+    name: blog-api-v1_vendor
+  storage:
+    name: blog-api-v1_storage
+  bootstrap_cache:
+    name: blog-api-v1_bootstrap_cache
+
+networks:
+  blog-network:
+    driver: bridge

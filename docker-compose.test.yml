@@ -1,0 +1,44 @@
+services:
+  test:
+    build:
+      context: .
+      target: test
+    container_name: blog-test
+    environment:
+      - APP_ENV=testing
+      - DB_CONNECTION=mysql
+      - DB_HOST=db-test
+      - DB_PORT=3306
+      - DB_DATABASE=blog_test
+      - DB_USERNAME=root
+      - DB_PASSWORD=root
+    volumes:
+      - .:/var/www/html
+      - vendor_data:/var/www/html/vendor
+    depends_on:
+      db-test:
+        condition: service_healthy
+        
+    networks:
+      - test-network
+
+  db-test:
+    image: mysql:8.0
+    container_name: blog-db-test
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: blog_test
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      timeout: 20s
+      retries: 10
+      interval: 5s
+    networks:
+      - test-network
+
+networks:
+  test-network:
+    driver: bridge
+
+volumes:
+  vendor_data:
