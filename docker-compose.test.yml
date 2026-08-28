@@ -18,7 +18,7 @@ services:
     depends_on:
       db-test:
         condition: service_healthy
-        
+
     networks:
       - test-network
 
@@ -29,10 +29,17 @@ services:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: blog_test
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
-      timeout: 20s
-      retries: 10
-      interval: 5s
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "127.0.0.1",
+          "--protocol=tcp",
+          "-uroot",
+          "-proot",
+        ]
     networks:
       - test-network
 
