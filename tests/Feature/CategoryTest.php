@@ -16,7 +16,7 @@ class CategoryTest extends TestCase
     {
         Sanctum::actingAs(User::factory()->create());
 
-        Category4::factory()->count(3)->create();
+        Category::factory()->count(3)->create();
 
         $response = $this->get('/api/categories');
 
