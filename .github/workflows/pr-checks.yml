@@ -1,0 +1,25 @@
+# .github/workflows/pr-checks.yml
+
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Rodar suíte de testes
+        run: |
+          docker compose -f docker-compose.test.yml up \
+            --build \
+            --abort-on-container-exit \
+            --exit-code-from test
+
+      - name: Derrubar containers de teste
+        if: always()
+        run: docker compose -f docker-compose.test.yml down -v
