@@ -18,15 +18,8 @@ services:
       context: .
       target: production
     container_name: blog-app
-    environment:
-      - APP_ENV=production
-      - APP_DEBUG=true
-      - DB_CONNECTION=mysql
-      - DB_HOST=db
-      - DB_PORT=3306
-      - DB_DATABASE=blog
-      - DB_USERNAME=root
-      - DB_PASSWORD=root
+    env_file:
+      - .env
     depends_on:
       db:
         condition: service_healthy
@@ -45,17 +38,18 @@ services:
     image: mysql:8.0
     container_name: blog-db
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: blog
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
     ports:
       - "3307:3306"
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--protocol=tcp", "-uroot", "-p${DB_PASSWORD}"]
       timeout: 20s
       retries: 10
       interval: 5s
+      start_period: 10s
     networks:
       - blog-network
     restart: unless-stopped

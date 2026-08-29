@@ -37,7 +37,7 @@ FROM base AS production
 COPY . .
 
 # Copiar .env de produção
-COPY .env.production .env
+# COPY .env.production .env
 
 # Instalar dependências
 RUN composer install --no-dev --optimize-autoloader --prefer-dist --no-progress \
