@@ -20,7 +20,7 @@ echo "🔑 Verificando APP_KEY..."
 
 php artisan config:clear
 
-if ! grep -q '^APP_KEY=base64:' .env 2>/dev/null; then
+if [ -z "$APP_KEY" ]; then
     php artisan key:generate --force
     echo "✅ Nova APP_KEY gerada."
 else
